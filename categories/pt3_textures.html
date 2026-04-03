@@ -21,21 +21,35 @@
     <p>
         Since currently you're still working on unlit shader, let's add just one texture for now. For this and future tutorials you'll probably
         need to get a PBR material texture set somewhere. You know, the basic PBR material, with albedo, normal, roughness, metalness and ambient occlusion maps.
-        <b><a href="https://ambientcg.com/">AmbientCG</a></b> or <b><a href="https://cc0-textures.com/">CC0-Textures</a></b> comes with a bunch of 
-        free materials you can use. But don't forget to check the licence! 
+        <b><a href="https://ambientcg.com/">AmbientCG</a></b> comes with a bunch of free materials you can use. But don't forget to check the licence! 
     </p>
+    <info>
+        Lost? Not sure which PBR material to choose? This <a href="https://ambientcg.com/view?id=Rock063">rock</a> will do just fine.
+    </info>
 
-    <h3>Disabling unnecessary texture inputs</h3>
+    <h3>Old, but Gold</h3>
+    <info>
+        This section tells about some quirks related to older versions of shader API. Take it just as a little extra bit of information,
+        but none of this is critically important.
+    </info>
     <p>
-        You probably noticed that your new unlit shader has two random texture inputs that you didn't add. This happens when your 
-        fragment shader code does not contain a special definition, <string>#define CUSTOM_MATERIAL_INPUTS</string>. This behavior is controlled 
-        by one of the HLSL files you've imported in previous article. Without this definition, s&box will attempt to generate two default 
-        texture inputs itself. 
+        Previously, you had to add <string>#define CUSTOM_MATERIAL_INPUTS</string> in your code. In older versions of s&box, if your shader 
+        did not contain this line, it would automatically generate two texture inputs, which are absolutely useless most of the time. 
+        When you added this definition, they would disappear.
     </p>
     <p>
-        Inside the <b>PS</b> block, right above the <string>#include "common/pixel.hlsl"</string>, add a new line with this text:
-        <string>#define CUSTOM_MATERIAL_INPUTS</string>. After this, those two input slots will disappear, and we'll be able to define our own 
-        inputs without random shit conflicting with our code. 
+        All you need to know today is, this definition is no longer required. You may see this mentioned in older discussions in s&box discord, 
+        and probably forums. I am letting you know about this, because I do not have enough time to update the rest of guide for newer API format
+        at the moment, and you will notice this line quite often in shader examples later.
+    </p>
+    <p>
+        I think there's some difference between available material/shading API functions depending on whether you have 
+        this thing defined or not, and for the sake of compatibility with the rest of this guide, lets keep it defined. Copy that thing above, 
+        and paste it right in the top section of <string>PS</string> block. 
+    </p>
+    <p>
+        If you are going to write shaders on your own, my advice would be avoiding this line. It is not necessary. I am going to give a proper overhaul 
+        for all articles/shader snippets later at some point. 
     </p>
 
     <h3>Texture2D Input macro</h3>
@@ -65,7 +79,7 @@ CreateInputTexture2D( AlbedoMap, Srgb, 8, "", "_color", "My Material,10/10", Def
                 <b>Linear</b> instead.
 
                 <p>
-                    <a href="https://threejs.org/docs/#manual/en/introduction/Color-management">Three.JS docs have a nice little explanation</a>
+                    <a href="https://threejs.org/manual/#en/color-management">Three.JS docs have a nice little explanation</a>
                     on the meaning and purpose of color spaces, if you're really curious about the difference between linear and sRGB. 
                 </p>
             </li>
@@ -84,7 +98,7 @@ CreateInputTexture2D( AlbedoMap, Srgb, 8, "", "_color", "My Material,10/10", Def
             <li>
                 <b>My Material,10/10</b> is a UI group name and intended order of how it'll be displayed in Material Editor. "My Material" is the name of this group,
                 first number is the order of this group, and second number is the order of this slot inside the UI group. There's a good 
-                article on wiki explaining <a href="https://wiki.facepunch.com/sbox/Shader_Reference#uigroup">more about UI groups and setting up the display order</a>. 
+                article on wiki explaining <a href="https://web.archive.org/web/20250726230425/https://wiki.facepunch.com/sbox/Shader_Reference#uigroup">more about UI groups and setting up the display order</a>. 
             </li>
             <li>
                 <b>Default3( 1.0, 1.0, 1.0 )</b> is the default color while this texture is unset. Set it to anything you'd like. 
@@ -132,8 +146,8 @@ Texture2D g_tColor < Channel( RGB, Box( AlbedoMap ), Srgb ); OutputFormat( BC7 )
     </p>
     <p>
         Next thing in here is <string>OutputFormat(BC7)</string>. This is where you select the <b>compression format</b> for your texture.
-        Source 2 comes with a number of compression formats that you can choose, however for must cases <b>BC7</b> or <b>DXT5</b> will be enough.
-        This page on s&box wiki explains really well <a href="https://wiki.facepunch.com/sbox/Shaders/TextureFormats">available compression formats and use-cases</a>.
+        Source 2 comes with a number of compression formats that you can choose, however for most cases <b>BC7</b> or <b>DXT5</b> will be enough.
+        This page on s&box wiki explains really well <a href="https://web.archive.org/web/20250717191911/https://wiki.facepunch.com/sbox/Shaders/TextureFormats">available compression formats and use-cases</a>.
     </p>
     <p>
         Last bit is <string>SrgbRead(true)</string>, which just signals that texture must be read in sRGB color space. Yeah, this is a third time 
@@ -176,7 +190,7 @@ PS
         required to follow this naming format, stick with whatever feels easier for you.
     </p>
     <p>
-        I've covered common naving conventions in s&box shaders in a different article, and you can read about it here: <article-ref link="namings">Naming Conventions</article-ref>
+        I've covered common naming conventions in s&box shaders in a different article, and you can read about it here: <article-ref link="namings">Naming Conventions</article-ref>
     </p>
     <info>
         There's a cool thing about Material Editor: these little name indicators are automatically detected by the editor and hidden from 
@@ -185,7 +199,7 @@ PS
 
     <h2>Sampling</h2>
     <p> 
-        We need to sample our new texture inside fragment shader. This is where our data fron <string>PixelInput</string> will come in handy!
+        We need to sample our new texture inside fragment shader. This is where our data from <string>PixelInput</string> will come in handy!
         Before that, lets take a very quick look on the <a href="https://docs.facepunch.com/s/sbox-dev/doc/default-vertex-and-pixel-shader-inputs-WAuOKVmkZ5">structure</a> of <string>PixelInput</string> before we continue.
 
         <ul>
@@ -201,7 +215,7 @@ PS
                 in any model editing program of their choice, this is a really common process, so I assume you're working with a mesh
                 that has UV set up already.<br><br>
 
-                Texture coordinates are set in 2D space, so it uses a float vector with two components. They're set in <b>[0-1]</b> range,
+                Texture coordinates are set in 2D space, so it uses a float vector with two components. They're set in <b>[0 to 1]</b> range,
                 but you can easily add or substract values to shift your textures, or multiply these coords to adjust the texture scale.<br><br>
 
                 Each texture coordinate is defined by vertices, and then values are linearly interpolated between each other.
@@ -233,7 +247,7 @@ PS
         the following code:
     </p>
     <pre><code class="language-hlsl">
-float3 MyTexture = g_tColor.Sample( g_sAniso, i.vTextureCoords );        
+float3 MyTexture = g_tColor.Sample( g_sAniso, i.vTextureCoords.xy );        
     </code></pre>
     <p>
         <string>.Sample()</string> is a special HLSL method that is available for Texture2D objects. First argument <string>g_sAniso</string>
@@ -365,13 +379,13 @@ float TextureScale < UiType( Slider ); Range( 0, 5 ); Default( 1 ); UiGroup("My 
         more control over the UVs. Instead, you can create a new <string>float2</string> variable, and use it when sampling textures. 
     </p>
     <pre><code class="language-hlsl">
-float2 uv = i.vTextureCoords;
+float2 uv = i.vTextureCoords.xy;
     </code></pre>    
     <p>
         Very nice. To adjust the scale of your texture, we just have to multiply it by our new float variable. Lets add it into the variable definition.
     </p>
     <pre><code class="language-hlsl">
-float2 uv = i.vTextureCoords * TextureScale;
+float2 uv = i.vTextureCoords.xy * TextureScale;
     </code></pre>
     <p>
         Now we can update <string>float3 MyTexture</string> sampling code by replacing <string>i.vTextureCoords</string> with 
@@ -379,7 +393,7 @@ float2 uv = i.vTextureCoords * TextureScale;
         we'll need to update just one variable instead of editing every .Sample() in the fragment shader.
     </p>
     <pre><code class="language-hlsl">
-float3 MyTexture = g_tColor.Sample( g_sAniso, uv );
+float3 MyTexture = g_tColor.Sample( g_sAniso, uv ).rgb;
     </code></pre>
     <p>
         Your fragment shader code should look something like this now. 
@@ -406,11 +420,11 @@ PS
         // When sampling multiple textures, we're often using same UV values. Instead of adding i.vTextureCoords
         // everywhere, lets just declare new float2 variable once, so if we decide to add more control over UVs,
         // we'll have to update only one variable. 
-        float2 uv = i.vTextureCoords * TextureScale;
+        float2 uv = i.vTextureCoords.xy * TextureScale;
 
         // Sample our texture2D with a common sampler state (anisotropic filter) and given texture coordinates.
         // Our texture2D has only RGB channels, so we'll use float3 for it. 
-        float3 MyTexture = g_tColor.Sample( g_sAniso, uv );
+        float3 MyTexture = g_tColor.Sample( g_sAniso, uv ).rgb;
     
         // Return a final pixel, with RGB values of our new texture, and forced opacity at 1. 
         return float4( MyTexture, 1 );
@@ -459,7 +473,7 @@ float2 TextureScrollSpeed < UiType( Slider ); Range2( 0, 0, 4, 4 ); Default2( 1,
         vector, you should append the global time variable, then multiply it by scrolling speed variable and scroll direction vector. 
     </p>
     <pre><code class="language-hlsl">
-float2 uv = i.vTextureCoords * TextureScale;
+float2 uv = i.vTextureCoords.xy * TextureScale;
 uv += g_flTime * TextureScrollSpeed * TextureScrollDirection;       
     </code></pre>
     <p>
@@ -496,8 +510,8 @@ uv += g_flTime * TextureScrollSpeed * TextureScrollDirection;
         </ul>
     </p>
     <p>
-        There's plenty of others variables available. You can see a full list on <a href="https://wiki.facepunch.com/sbox/Constant_Buffers#builtinconstantbuffer">s&box wiki</a>,
-        (although be aware that some of the information there may be outdated), or <a href="https://docs.facepunch.com/s/sbox-dev/doc/global-variables-kSdlbnBNq8">official s&box documentation</a>.
+        There's plenty of others variables available. You can see a list in <a href="https://docs.facepunch.com/s/sbox-dev/doc/global-variables-kSdlbnBNq8">official s&box documentation</a>
+        (or full list in <string>game/core/shaders/common.fxc</string> on <a href="https://github.com/Facepunch/sbox-public/blob/master/game/core/shaders/common.fxc">GitHub</a>).
     </p>
 
     <h3>Back to our Shader</h3>
@@ -523,7 +537,7 @@ float3 TextureTint < UiType( Color ); Default3( 1, 1, 1 ); UiGroup( "My Material
         line multiply the texture by <string>TextureTint</string> variable:
     </p>
     <pre><code class="language-hlsl">
-float3 MyTexture = g_tColor.Sample( g_sAniso, uv ) * TextureTint;
+float3 MyTexture = g_tColor.Sample( g_sAniso, uv ).rgb * TextureTint;
     </code></pre>
     <p>
         Now check the Material Editor. New property shows up, with a color picker UI. By default it is set to be a white color, 

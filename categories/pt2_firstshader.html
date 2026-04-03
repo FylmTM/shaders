@@ -402,11 +402,11 @@ PS
         except it's in 0-1 range!
     </p>
     <info>
-        Most values in shaders are represented within <b>[0 - 1]</b> range. Going beyond this range may cause a visual mess. You can use <string>saturate( float in )</string> to clamp
+        Most values in shaders are represented within <b>[0 to 1]</b> range. Going beyond this range may cause a visual mess. You can use <string>saturate( float in )</string> to clamp
         your value in 0-1 range if you expect that it'll be larger than that in realtime. Not sure if it is a good advice, but you probably want to write your math 
         in a way where you don't have to rely on <string>saturate()</string> too much.
         <br><br>
-        There's an exception with normals - they are operating in <b>[-1 - 1]</b> range. 
+        There's an exception with normals - they are operating in <b>[-1 to 1]</b> range. 
     </info>
     <p>
         Then we just have to return the color, but inside a <string>float4</string> vector. Since our color just represents <b>RGB</b> without the <b>A</b> component (opacity),
