@@ -76,12 +76,12 @@ PS
         // After multiplying speed and time, we multiply it by direction. If it's zero, then total scroll offset
         // will be zero. If it's 1, then it'll keep scrolling in positive axis component. If it's -1, it'll 
         // go in opposite direction. 
-        float2 uv = i.vTextureCoords * TextureScale;
+        float2 uv = i.vTextureCoords.xy * TextureScale;
         uv += g_flTime * TextureScrollSpeed * TextureScrollDirection;
         
         // Sample our texture2D with a common sampler state (anisotropic filter) and given texture coordinates.
         // Our texture2D has only RGB channels, so we'll use float3 for it. 
-        float3 MyTexture = g_tColor.Sample( g_sAniso, uv ) * TextureTint;
+        float3 MyTexture = g_tColor.Sample( g_sAniso, uv ).rgb * TextureTint;
     
         // Return a final pixel, with RGB values of our new texture, and forced opacity at 1. 
         return float4( MyTexture, 1 );
