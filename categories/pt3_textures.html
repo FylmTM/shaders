@@ -27,22 +27,30 @@
         Lost? Not sure which PBR material to choose? This <a href="https://ambientcg.com/view?id=Rock063">rock</a> will do just fine.
     </info>
 
-    <h3>Disabling unnecessary texture inputs</h3>
-    <p>
-        You probably noticed that your new unlit shader has two random texture inputs that you didn't add. This happens when your 
-        fragment shader code does not contain a special definition, <string>#define CUSTOM_MATERIAL_INPUTS</string>. This behavior is controlled 
-        by one of the HLSL files you've imported in previous article. Without this definition, s&box will attempt to generate two default 
-        texture inputs itself. 
-    </p>
-    <p>
-        Inside the <b>PS</b> block, right above the <string>#include "common/pixel.hlsl"</string>, add a new line with this text:
-        <string>#define CUSTOM_MATERIAL_INPUTS</string>. After this, those two input slots will disappear, and we'll be able to define our own 
-        inputs without random shit conflicting with our code. 
-    </p>
+    <h3>Old, but Gold</h3>
     <info>
-        Recent versions of s&box might not have default textures anymore, but still use
-        <string>CUSTOM_MATERIAL_INPUTS</string> internally, so make sure to add it.
+        This section tells about some quirks related to older versions of shader API. Take it just as a little extra bit of information,
+        but none of this is critically important.
     </info>
+    <p>
+        Previously, you had to add <string>#define CUSTOM_MATERIAL_INPUTS</string> in your code. In older versions of s&box, if your shader 
+        did not contain this line, it would automatically generate two texture inputs, which are absolutely useless most of the time. 
+        When you added this definition, they would disappear.
+    </p>
+    <p>
+        All you need to know today is, this definition is no longer required. You may see this mentioned in older discussions in s&box discord, 
+        and probably forums. I am letting you know about this, because I do not have enough time to update the rest of guide for newer API format
+        at the moment, and you will notice this line quite often in shader examples later.
+    </p>
+    <p>
+        I think there's some difference between available material/shading API functions depending on whether you have 
+        this thing defined or not, and for the sake of compatibility with the rest of this guide, lets keep it defined. Copy that thing above, 
+        and paste it right in the top section of <string>PS</string> block. 
+    </p>
+    <p>
+        If you are going to write shaders on your own, my advice would be avoiding this line. It is not necessary. I am going to give a proper overhaul 
+        for all articles/shader snippets later at some point. 
+    </p>
 
     <h3>Texture2D Input macro</h3>
     <p>
